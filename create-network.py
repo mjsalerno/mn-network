@@ -1,5 +1,5 @@
 __author__ = 'michael'
-
+#sudo mn --custom ~/mininet/custom/topo-2sw-2host.py --topo mytopo --test pingall
 
 from mininet.topo import Topo
 
