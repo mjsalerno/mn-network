@@ -1,4 +1,5 @@
 from mininet.node import RemoteController
+from functools import partial
 from mininet.topo import Topo
 from mininet.net import Mininet
 
@@ -96,8 +97,9 @@ topos = { 'mytopo': ( lambda: MyTopo() ) }
 
 
 def main():
-    network = Mininet(topo=MyTopo, controller=RemoteController('c1'))
+    network = Mininet(topo=MyTopo(), controller=partial( RemoteController, ip='127.0.0.1', port=6633 ))
     network.start()
 
 if __name__ == '__main__':
     main()
+
