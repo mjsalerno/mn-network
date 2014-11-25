@@ -5,9 +5,10 @@ from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.log import setLogLevel
 from mininet.cli import CLI
+from mininet.link import TCLink
 
 __author__ = 'michael'
-#sudo mn --custom ~/mininet/custom/topo-2sw-2host.py --topo mytopo --test pingall
+#sudo ./create-network.py
 
 from mininet.topo import Topo
 
@@ -29,8 +30,8 @@ class MyTopo(Topo):
         expressed in packets.
         """
 
-        wifiopts = dict(bw=10, delay='5ms', loss=50, max_queue_size=1000, use_htb=True)
-        linkopts = dict(bw=10, delay='5ms', loss=10, max_queue_size=1000, use_htb=True)
+        wifiopts = dict(bw=10, delay='5ms', loss=10, max_queue_size=1000, use_htb=True)
+        linkopts = dict(bw=1000, delay='0ms', loss=0, max_queue_size=10000, use_htb=True)
 
         #DMZ
         dmz_sw = self.addSwitch('s1')
@@ -66,13 +67,13 @@ class MyTopo(Topo):
 
         self.addLink(d1_sw1, d1_sw2, **linkopts)
         self.addLink(d1_sw1, d1_sw3, **linkopts)
-        self.addLink(d1_sw1, d1_wifi, **linkopts)
+        self.addLink(d1_sw1, d1_wifi, **wifiopts)
         self.addLink(d1_sw2, d1_host1, **linkopts)
         self.addLink(d1_sw2, d1_host2, **linkopts)
         self.addLink(d1_sw3, d1_host3, **linkopts)
         self.addLink(d1_sw3, d1_host4, **linkopts)
-        self.addLink(d1_wifi, d1_host5, **linkopts)
-        self.addLink(d1_wifi, d1_host6, **linkopts)
+        self.addLink(d1_wifi, d1_host5, **wifiopts)
+        self.addLink(d1_wifi, d1_host6, **wifiopts)
 
 
         #Dept 2
@@ -88,13 +89,13 @@ class MyTopo(Topo):
         d2_host6 = self.addHost('h17')
         self.addLink(d2_sw1, d2_sw2, **linkopts)
         self.addLink(d2_sw1, d2_sw3, **linkopts)
-        self.addLink(d2_sw1, d2_wifi, **linkopts)
+        self.addLink(d2_sw1, d2_wifi, **wifiopts)
         self.addLink(d2_sw2, d2_host1, **linkopts)
         self.addLink(d2_sw2, d2_host2, **linkopts)
         self.addLink(d2_sw3, d2_host3, **linkopts)
         self.addLink(d2_sw3, d2_host4, **linkopts)
-        self.addLink(d2_wifi, d2_host5, **linkopts)
-        self.addLink(d2_wifi, d2_host6, **linkopts)
+        self.addLink(d2_wifi, d2_host5, **wifiopts)
+        self.addLink(d2_wifi, d2_host6, **wifiopts)
 
 
         #Core
@@ -110,7 +111,7 @@ topos = { 'mytopo': ( lambda: MyTopo() ) }
 
 def main():
     setLogLevel('info')
-    network = Mininet(topo=MyTopo(), controller=partial( RemoteController, ip='127.0.0.1', port=6633 ))
+    network = Mininet(topo=MyTopo(), controller=partial(RemoteController, ip='127.0.0.1', port=6633), link=TCLink)
     network.start()
     network.pingAll()
     CLI(network)
