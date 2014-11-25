@@ -1,7 +1,10 @@
+from mininet.node import RemoteController
+from mininet.topo import Topo
+from mininet.net import Mininet
+
 __author__ = 'michael'
 #sudo mn --custom ~/mininet/custom/topo-2sw-2host.py --topo mytopo --test pingall
 
-from mininet.topo import Topo
 
 
 class MyTopo(Topo):
@@ -90,3 +93,11 @@ class MyTopo(Topo):
 
 
 topos = { 'mytopo': ( lambda: MyTopo() ) }
+
+
+def main():
+    network = Mininet(topo=MyTopo, controller=RemoteController('c1'))
+    network.start()
+
+if __name__ == '__main__':
+    main()
