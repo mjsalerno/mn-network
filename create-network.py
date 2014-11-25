@@ -21,15 +21,24 @@ class MyTopo(Topo):
         # Initialize topology
         Topo.__init__(self)
 
+        """
+        adds a bidirectional link with bandwidth, delay and loss characteristics, with a maximum queue size of
+        1000 packets using the Hierarchical Token Bucket rate limiter and netem delay/loss emulator. The parameter bw
+        is expressed as a number in Mb/s; delay is expressed as a string with units in place
+        (e.g. '5ms', '100us', '1s'); loss is expressed as a percentage (between 0 and 100); and max_queue_size is
+        expressed in packets.
+        """
 
+        wifiopts = dict(bw=10, delay='5ms', loss=50, max_queue_size=1000, use_htb=True)
+        linkopts = dict(bw=10, delay='5ms', loss=10, max_queue_size=1000, use_htb=True)
 
         #DMZ
         dmz_sw = self.addSwitch('s1')
         dmz_srv = self.addHost('h1')
         dmz_fw = self.addHost('h2')
 
-        self.addLink(dmz_sw, dmz_srv)
-        self.addLink(dmz_sw, dmz_fw)
+        self.addLink(dmz_sw, dmz_srv, **linkopts)
+        self.addLink(dmz_sw, dmz_fw, **linkopts)
 
 
 
@@ -38,8 +47,8 @@ class MyTopo(Topo):
         apps_srv = self.addHost('h3')
         apps_fw = self.addHost('h4')
 
-        self.addLink(apps_sw, apps_srv)
-        self.addLink(apps_sw, apps_fw)
+        self.addLink(apps_sw, apps_srv, **linkopts)
+        self.addLink(apps_sw, apps_fw, **linkopts)
 
 
 
@@ -55,15 +64,15 @@ class MyTopo(Topo):
         d1_host5 = self.addHost('h10')
         d1_host6 = self.addHost('h11')
 
-        self.addLink(d1_sw1, d1_sw2)
-        self.addLink(d1_sw1, d1_sw3)
-        self.addLink(d1_sw1, d1_wifi)
-        self.addLink(d1_sw2, d1_host1)
-        self.addLink(d1_sw2, d1_host2)
-        self.addLink(d1_sw3, d1_host3)
-        self.addLink(d1_sw3, d1_host4)
-        self.addLink(d1_wifi, d1_host5)
-        self.addLink(d1_wifi, d1_host6)
+        self.addLink(d1_sw1, d1_sw2, **linkopts)
+        self.addLink(d1_sw1, d1_sw3, **linkopts)
+        self.addLink(d1_sw1, d1_wifi, **linkopts)
+        self.addLink(d1_sw2, d1_host1, **linkopts)
+        self.addLink(d1_sw2, d1_host2, **linkopts)
+        self.addLink(d1_sw3, d1_host3, **linkopts)
+        self.addLink(d1_sw3, d1_host4, **linkopts)
+        self.addLink(d1_wifi, d1_host5, **linkopts)
+        self.addLink(d1_wifi, d1_host6, **linkopts)
 
 
         #Dept 2
@@ -77,23 +86,23 @@ class MyTopo(Topo):
         d2_host4 = self.addHost('h15')
         d2_host5 = self.addHost('h16')
         d2_host6 = self.addHost('h17')
-        self.addLink(d2_sw1, d2_sw2)
-        self.addLink(d2_sw1, d2_sw3)
-        self.addLink(d2_sw1, d2_wifi)
-        self.addLink(d2_sw2, d2_host1)
-        self.addLink(d2_sw2, d2_host2)
-        self.addLink(d2_sw3, d2_host3)
-        self.addLink(d2_sw3, d2_host4)
-        self.addLink(d2_wifi, d2_host5)
-        self.addLink(d2_wifi, d2_host6)
+        self.addLink(d2_sw1, d2_sw2, **linkopts)
+        self.addLink(d2_sw1, d2_sw3, **linkopts)
+        self.addLink(d2_sw1, d2_wifi, **linkopts)
+        self.addLink(d2_sw2, d2_host1, **linkopts)
+        self.addLink(d2_sw2, d2_host2, **linkopts)
+        self.addLink(d2_sw3, d2_host3, **linkopts)
+        self.addLink(d2_sw3, d2_host4, **linkopts)
+        self.addLink(d2_wifi, d2_host5, **linkopts)
+        self.addLink(d2_wifi, d2_host6, **linkopts)
 
 
         #Core
         core = self.addSwitch('s100')
-        self.addLink(core, dmz_sw)
-        self.addLink(core, apps_sw)
-        self.addLink(core, d1_sw1)
-        self.addLink(core, d2_sw1)
+        self.addLink(core, dmz_sw, **linkopts)
+        self.addLink(core, apps_sw, **linkopts)
+        self.addLink(core, d1_sw1, **linkopts)
+        self.addLink(core, d2_sw1, **linkopts)
 
 
 topos = { 'mytopo': ( lambda: MyTopo() ) }
