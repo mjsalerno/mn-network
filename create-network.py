@@ -1,7 +1,10 @@
+#!/usr/bin/env python
 from mininet.node import RemoteController
 from functools import partial
 from mininet.topo import Topo
 from mininet.net import Mininet
+from mininet.log import setLogLevel
+from mininet.cli import CLI
 
 __author__ = 'michael'
 #sudo mn --custom ~/mininet/custom/topo-2sw-2host.py --topo mytopo --test pingall
@@ -97,8 +100,11 @@ topos = { 'mytopo': ( lambda: MyTopo() ) }
 
 
 def main():
+    setLogLevel('info')
     network = Mininet(topo=MyTopo(), controller=partial( RemoteController, ip='127.0.0.1', port=6633 ))
     network.start()
+    network.pingAll()
+    CLI(network)
 
 if __name__ == '__main__':
     main()
