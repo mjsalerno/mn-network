@@ -1,16 +1,18 @@
 #!/usr/bin/env python
+import time
 from mininet.node import RemoteController
 from functools import partial
-from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.log import setLogLevel
 from mininet.cli import CLI
 from mininet.link import TCLink
 
 __author__ = 'michael'
-#sudo ./create-network.py
+# sudo ./create-network.py
 
 from mininet.topo import Topo
+
+topos = {'mytopo': (lambda: MyTopo())}
 
 
 class MyTopo(Topo):
@@ -33,7 +35,7 @@ class MyTopo(Topo):
         wifiopts = dict(bw=10, delay='5ms', loss=10, max_queue_size=1000, use_htb=True)
         linkopts = dict(bw=1000, delay='0ms', loss=0, max_queue_size=10000, use_htb=True)
 
-        #DMZ
+        # DMZ
         dmz_sw = self.addSwitch('s1')
         dmz_srv = self.addHost('h1')
         dmz_fw = self.addHost('h2')
@@ -41,9 +43,7 @@ class MyTopo(Topo):
         self.addLink(dmz_sw, dmz_srv, **linkopts)
         self.addLink(dmz_sw, dmz_fw, **linkopts)
 
-
-
-        #Apps
+        # Apps
         apps_sw = self.addSwitch('s2')
         apps_srv = self.addHost('h3')
         apps_fw = self.addHost('h4')
@@ -51,9 +51,7 @@ class MyTopo(Topo):
         self.addLink(apps_sw, apps_srv, **linkopts)
         self.addLink(apps_sw, apps_fw, **linkopts)
 
-
-
-        #Dept 1
+        # Dept 1
         d1_sw1 = self.addSwitch('s3')
         d1_sw2 = self.addSwitch('s4')
         d1_sw3 = self.addSwitch('s5')
@@ -75,8 +73,7 @@ class MyTopo(Topo):
         self.addLink(d1_wifi, d1_host5, **wifiopts)
         self.addLink(d1_wifi, d1_host6, **wifiopts)
 
-
-        #Dept 2
+        # Dept 2
         d2_sw1 = self.addSwitch('s7')
         d2_sw2 = self.addSwitch('s8')
         d2_sw3 = self.addSwitch('s9')
@@ -97,8 +94,7 @@ class MyTopo(Topo):
         self.addLink(d2_wifi, d2_host5, **wifiopts)
         self.addLink(d2_wifi, d2_host6, **wifiopts)
 
-
-        #Core
+        # Core
         core = self.addSwitch('s100')
         self.addLink(core, dmz_sw, **linkopts)
         self.addLink(core, apps_sw, **linkopts)
@@ -106,7 +102,24 @@ class MyTopo(Topo):
         self.addLink(core, d2_sw1, **linkopts)
 
 
-topos = { 'mytopo': ( lambda: MyTopo() ) }
+def startpings(host, targetips):
+    """Tell host to repeatedly ping targets"""
+
+    targetips = ' '.join(targetips)
+
+    # Simple ping loop
+    cmd = ('while true; do '
+           ' for ip in %s; do ' % targetips +
+           '  echo -n %s "->" $ip ' % host.IP() +
+           '   `ping -c1 -w 1 $ip | grep packets` ;'
+           '  sleep 1;'
+           ' done; '
+           'done &')
+
+    print ('*** Host %s (%s) will be pinging ips: %s' %
+           (host.name, host.IP(), targetips))
+
+    host.cmd(cmd)
 
 
 def main():
@@ -114,8 +127,12 @@ def main():
     network = Mininet(topo=MyTopo(), controller=partial(RemoteController, ip='127.0.0.1', port=6633), link=TCLink)
     network.start()
     network.pingAll()
+
+    while True:
+        network.pingAll()
+        time.sleep(60)
+
     CLI(network)
 
 if __name__ == '__main__':
     main()
-
